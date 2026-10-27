@@ -1,0 +1,16 @@
+export const REGIONS = Object.freeze([
+  "Toshkent shahri",
+  "Toshkent viloyati",
+  "Andijon",
+  "Buxoro",
+  "Farg‘ona",
+  "Jizzax",
+  "Qashqadaryo",
+  "Navoiy",
+  "Namangan",
+  "Samarqand",
+  "Sirdaryo",
+  "Surxondaryo",
+  "Xorazm",
+  "Qoraqalpog‘iston Respublikasi",
+]);

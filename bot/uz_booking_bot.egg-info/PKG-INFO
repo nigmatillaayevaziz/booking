@@ -1,0 +1,26 @@
+Metadata-Version: 2.4
+Name: uz-booking-bot
+Version: 0.1.0
+Summary: Viloyatlararo transport booking Telegram bot
+Requires-Python: >=3.12
+Requires-Dist: aiogram<4,>=3.22
+Requires-Dist: alembic<2,>=1.16
+Requires-Dist: asyncpg<1,>=0.30
+Requires-Dist: celery[redis]<6,>=5.5
+Requires-Dist: cryptography<47,>=46
+Requires-Dist: fastapi<1,>=0.118
+Requires-Dist: httpx<1,>=0.28
+Requires-Dist: pydantic-settings<3,>=2.10
+Requires-Dist: qrcode[pil]<9,>=8.2
+Requires-Dist: redis<7,>=6.4
+Requires-Dist: sentry-sdk[fastapi]<3,>=2.40
+Requires-Dist: sqlalchemy[asyncio]<3,>=2.0.44
+Requires-Dist: structlog<26,>=25.4
+Requires-Dist: uvicorn[standard]<1,>=0.37
+Provides-Extra: dev
+Requires-Dist: mypy<2,>=1.18; extra == "dev"
+Requires-Dist: pytest<9,>=8.4; extra == "dev"
+Requires-Dist: pytest-asyncio<2,>=1.2; extra == "dev"
+Requires-Dist: pytest-cov<8,>=7; extra == "dev"
+Requires-Dist: ruff<1,>=0.14; extra == "dev"
+Requires-Dist: testcontainers[postgres,redis]<5,>=4.13; extra == "dev"

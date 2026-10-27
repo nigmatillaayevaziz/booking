@@ -1,0 +1,17 @@
+.env
+__pycache__/
+*.py[cod]
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/*.pid
+logs/
+node_modules/
+.pytest_cache/
+.ruff_cache/
+.npm-cache/
+bot/.venv/
+bot/.env
+.tmp/
+.pip-cache/
+

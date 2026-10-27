@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Telegram botni ishga tushirish",
+      "program": "${workspaceFolder}/src/main.mjs",
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}
