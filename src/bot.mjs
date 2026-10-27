@@ -23,9 +23,8 @@ export class TicketBot {
 
   isAdmin(userId) { return this.config.adminIds.has(userId); }
 
-  async initialize() {
+  async initialize({ webhookUrl = "", webhookSecret = "", forcePolling = false } = {}) {
     const me = await this.tg.call("getMe");
-    await this.tg.call("deleteWebhook", { drop_pending_updates: false });
     await this.tg.call("setMyCommands", { commands: [
       { command: "start", description: "🏠 Bosh menyuni ochish" },
       { command: "mybookings", description: "📋 Buyurtmalarim" },
@@ -33,7 +32,23 @@ export class TicketBot {
       { command: "cancel", description: "❌ Joriy jarayonni bekor qilish" },
       { command: "admin", description: "🛠 Boshqaruv paneli" },
     ] });
-    this.logger.info(`@${me.username} ishga tushdi`);
+    if (webhookUrl) {
+      await this.tg.call("setWebhook", {
+        url: webhookUrl,
+        secret_token: webhookSecret,
+        allowed_updates: ["message", "callback_query"],
+        max_connections: 1,
+        drop_pending_updates: false,
+      });
+      this.logger.info(`@${me.username} webhook rejimida ishga tushdi`);
+    } else {
+      const currentWebhook = await this.tg.call("getWebhookInfo");
+      if (currentWebhook?.url && !forcePolling) {
+        throw new Error("Production webhook faol. Lokal polling uni o‘chirmaydi; zarur bo‘lsa FORCE_POLLING=true qo‘ying.");
+      }
+      if (currentWebhook?.url) await this.tg.call("deleteWebhook", { drop_pending_updates: false });
+      this.logger.info(`@${me.username} polling rejimida ishga tushdi`);
+    }
     await this.flushNotifications();
     return me;
   }

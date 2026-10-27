@@ -6,6 +6,7 @@ import { TicketBot } from "./bot.mjs";
 import { loadConfig } from "./config.mjs";
 import { Database } from "./database.mjs";
 import { Telegram } from "./telegram.mjs";
+import { createWebhookServer, deriveWebhookSecret } from "./webhook.mjs";
 
 const rootDir = process.cwd();
 const levels = { debug: 10, info: 20, warn: 30, error: 40 };
@@ -23,10 +24,27 @@ let database;
 let bot;
 let pidPath;
 let logger = createLogger("info");
+let server;
+let serverReady = false;
+let finishServer;
 
 try {
   const config = loadConfig(rootDir);
   logger = createLogger(config.logLevel);
+  const webhookSecret = deriveWebhookSecret(config.token);
+  if (config.webhookBaseUrl) {
+    server = createWebhookServer({
+      getBot: () => bot,
+      isReady: () => serverReady,
+      secret: webhookSecret,
+      logger,
+    });
+    await new Promise((resolve, reject) => {
+      server.once("error", reject);
+      server.listen(config.port, "0.0.0.0", resolve);
+    });
+    logger.info(`HTTP server 0.0.0.0:${config.port} da ishga tushdi`);
+  }
   database = await Database.connect(config.mongoUri, config.mongoDbName, config.timeZone);
   logger.info(`MongoDB bazasiga ulandi: ${config.mongoDbName}`);
   if (config.seedDemoData) await database.seedDemoData();
@@ -37,19 +55,28 @@ try {
 
   const telegram = new Telegram(config.token, logger);
   bot = new TicketBot({ telegram, database, config, logger });
-  await bot.initialize();
+  await bot.initialize({
+    webhookUrl: config.webhookBaseUrl ? `${config.webhookBaseUrl}/telegram/webhook` : "",
+    webhookSecret,
+    forcePolling: config.forcePolling,
+  });
+  serverReady = true;
 
   const shutdown = (signal) => {
     logger.info(`${signal} olindi, bot to‘xtatilmoqda`);
     bot.stop();
+    serverReady = false;
+    if (server) server.close(() => finishServer?.());
   };
   process.once("SIGINT", () => shutdown("SIGINT"));
   process.once("SIGTERM", () => shutdown("SIGTERM"));
-  await bot.run();
+  if (server) await new Promise((resolve) => { finishServer = resolve; });
+  else await bot.run();
 } catch (error) {
   logger.error("Bot ishga tushmadi:", error?.message ?? error);
   process.exitCode = 1;
 } finally {
   try { await database?.close(); } catch {}
+  try { server?.close(); } catch {}
   try { if (pidPath && fs.existsSync(pidPath)) fs.unlinkSync(pidPath); } catch {}
 }

@@ -56,6 +56,12 @@ export function loadConfig(rootDir = process.cwd()) {
   if (!["debug", "info", "warn", "error"].includes(logLevel)) {
     throw new Error("LOG_LEVEL debug, info, warn yoki error bo‘lishi kerak.");
   }
+  const webhookBaseUrl = (process.env.WEBHOOK_URL ?? process.env.RENDER_EXTERNAL_URL ?? "").trim().replace(/\/$/, "");
+  if (webhookBaseUrl && !/^https:\/\/[A-Za-z0-9.-]+(?::\d+)?(?:\/.*)?$/.test(webhookBaseUrl)) {
+    throw new Error("WEBHOOK_URL HTTPS manzil bo‘lishi kerak.");
+  }
+  const port = Number(process.env.PORT ?? 10_000);
+  if (!Number.isInteger(port) || port < 1 || port > 65_535) throw new Error("PORT noto‘g‘ri.");
 
   return Object.freeze({
     token,
@@ -66,5 +72,8 @@ export function loadConfig(rootDir = process.cwd()) {
     seedDemoData: booleanValue(process.env.SEED_DEMO_DATA, true),
     logLevel,
     pidPath: path.resolve(rootDir, process.env.PID_PATH ?? "data/bot.pid"),
+    webhookBaseUrl,
+    port,
+    forcePolling: booleanValue(process.env.FORCE_POLLING, false),
   });
 }
